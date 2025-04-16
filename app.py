@@ -97,7 +97,7 @@ def forgot_password():
 @app.route('/home')
 def home():
     # Fetch posts from the database (assuming posts are in 'posts' collection)
-    postts = db['posts'].find()  # Adjust collection name if needed
+    postts = db['posts'].find().sort('_id', -1) #sort by id descending order
     user_name = session.get('user_name')
     # commentts = db['comments_db'].find()
     comments = {}
