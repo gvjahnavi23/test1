@@ -11,7 +11,7 @@ import mimetypes
 import imghdr
 
 app = Flask(__name__)
-with open("test\config.json", "r") as file:
+with open("config.json", "r") as file:
     config = json.load(file)
     
 app.secret_key = config["secret_key" ""]
