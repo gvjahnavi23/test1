@@ -2,14 +2,14 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, s
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 import bson
-import gunicorn
+# import gunicorn
 import json
 from bson import ObjectId
 from flask import Response
 from werkzeug.utils import secure_filename
 import mimetypes
 import imghdr
-
+from bson import Binary
 app = Flask(__name__)
 with open("test\config.json", "r") as file:
     config = json.load(file)
@@ -97,7 +97,8 @@ def forgot_password():
 @app.route('/home')
 def home():
     # Fetch posts from the database (assuming posts are in 'posts' collection)
-    postts = db['posts'].find()  # Adjust collection name if needed
+    postts = db['posts'].find().sort('_id', -1) #sort by id descending order
+    # postts = db['posts'].find()  # Adjust collection name if needed
     user_name = session.get('user_name')
     # commentts = db['comments_db'].find()
     comments = {}
@@ -152,6 +153,7 @@ def write_post():
 #submit the post
 
 @app.route('/submit_post', methods=['POST'])
+
 def submit_post():
     # Get data from the form
     title = request.form['title']
@@ -159,37 +161,49 @@ def submit_post():
     email = session.get('email')
     name = session.get('user_name')
     media = request.files.get('media')
-    # print(media)
-    # Insert the post into the MongoDB collection
-    if email==collection2.find_one({'email':email})['email']: 
+
+    print(f"[DEBUG] Title: {title}")
+    print(f"[DEBUG] Content: {content}")
+    print(f"[DEBUG] Email from session: {email}")
+    print(f"[DEBUG] Name from session: {name}")
+    print(f"[DEBUG] Media: {media}")  # Will print <FileStorage ...>
+
+    if email == collection2.find_one({'email': email})['email']:
         post_data = {
             'title': title,
             'content': content,
-            'mail' : email,
-            'name' : name
+            'mail': email,
+            'name': name
         }
-        if media:
-            media_type = media.content_type  # Get MIME type of the uploaded file
-            print(media_type)
-        
-            # Check if the uploaded file is an image or video
+
+        if media and media.filename != '':
+            media_type = media.content_type
+            media_binary = media.read()
+
+            print(f"[DEBUG] Media filename: {media.filename}")
+            print(f"[DEBUG] Media content type: {media_type}")
+            print(f"[DEBUG] Media content length: {len(media_binary)} bytes")
+
             if media_type.startswith('image/'):
-                # Handle image
-                media_binary = media.read()
-                post_data['image'] = bson.Binary(media_binary)
+                post_data['image'] = Binary(media_binary)
+                print("[DEBUG] Image added to post_data")
             elif media_type.startswith('video/'):
-                # Handle video
-                media_binary = media.read()
-                post_data['video'] = bson.Binary(media_binary)
-                post_data['filename'] = secure_filename(media.filename)  # Save the original filename for later reference
-            
-    # Insert post data into MongoDB
-        collection3.insert_one(post_data)
+                post_data['video'] = Binary(media_binary)
+                post_data['filename'] = secure_filename(media.filename)
+                print("[DEBUG] Video added to post_data")
+        else:
+            print("[DEBUG] No media uploaded.")
+
+        # Insert into database
+        result = collection3.insert_one(post_data)
+        print(f"[DEBUG] Post inserted with ID: {result.inserted_id}")
+
         return redirect(url_for('home'))
 
     else:
+        print("[DEBUG] Email not found in collection2. Redirecting to index.")
         return redirect(url_for('index'))
-    
+
 
 @app.route('/display')
 def display():
