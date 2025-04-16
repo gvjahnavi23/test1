@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <style>
+        button {
+      width: 10%;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    </style>
+</head>
+<body>
+    <h3 style="color: blue; font-style: italic; margin-left: 80%; width: fit-content;">UserMania</h3>
+    <h1>Welcome, {{ names }}!</h1>
+<p>Email: {{ mail }}</p>
+{% if post_titles %}
+<h4>Your contribution</h4>
+{% for post in post_titles %}
+    <li>{{ post[0] }} with likes {{ post[1] }}</li>
+{% endfor %}
+{% else %}
+<h4>Start contributing</h4>
+{% endif %}
+
+<p>You have liked {{ like }} post(s).</p>  <br>
+
+{% if liked_posts %}
+<h4>Liked posts are:</h4>
+<ul>
+    {% for post in liked_posts %}
+        <li>{{ post }}</li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>You haven't liked any of the post</p>
+{% endif %}
+
+
+
+    <!-- Logout form -->
+    <form action="/logout">
+        <button type="submit">Logout</button>
+    </form>
+</body>
+</html>

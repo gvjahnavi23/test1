@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login / Registration Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 300px;
+    }
+    h2 {
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .message {
+      color: red;
+      text-align: center;
+    }
+    .success {
+      color: green;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="container">
+    <div style="display: flex; justify-content: flex-start; align-items: center; gap: 10px;">
+      <h2>Welcome to </h2>
+      <h2 style="color: blue; font-style: italic;">UserMania</h2>
+    </div>
+    
+    <p id="message" class="message"></p>
+    
+    <!-- Login Form -->
+    <form id="userForm">
+      <div>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+      <div>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+      </div>
+      <div>
+        <button type="button" id="loginBtn">Login</button>
+      </div>
+    </form>
+
+    <!-- Forgot Password Link -->
+    <p id="forgotPasswordLink"><a href="#" onclick="showForgotPasswordForm()">Forgot Password?</a></p>
+
+    <!-- Forgot Password Form -->
+    <div id="forgotPasswordForm" style="display:none;">
+      <h3>Reset Password</h3>
+      <form id="resetPasswordForm">
+        <div>
+          <label for="email">Email:</label>
+          <input type="email" id="resetEmail" name="email" required>
+        </div>
+        <div>
+          <label for="newPassword">New Password:</label>
+          <input type="password" id="newPassword" name="newPassword" required>
+        </div>
+        <div>
+          <label for="confirmPassword">Confirm New Password:</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" required>
+        </div>
+        <div>
+          <button type="button" id="resetBtn">Reset Password</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Create New Account Button -->
+    <button type="button" onclick="showNewUserForm()">Create New Account</button>
+
+    <!-- New User Registration Form (initially hidden) -->
+    <div id="newUserForm" style="display: none;">
+      <h3>Create a New Account</h3>
+      <form id="registerForm">
+        <div>
+          <label for="newName">Name:</label>
+          <input type="text" id="RnewName" name="RnewName" required>
+        </div>
+        <div>
+          <label for="newEmail">Email:</label>
+          <input type="email" id="RnewEmail" name="RnewEmail" required>
+        </div>
+        <div>
+          <label for="newPassword">Password:</label>
+          <input type="password" id="RnewPassword" name="RnewPassword" required>
+        </div>
+        <div>
+          <label for="confirmPassword">Confirm Password:</label>
+          <input type="password" id="RconfirmPassword" name="RconfirmPassword" required>
+        </div>
+        <div>
+          <button type="button" id="registerBtn" >Register</button>
+          <h4>Already have account ⬇️</h4>
+          <button type="button" onclick="resetForms()">Login</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Event listeners for buttons
+    document.getElementById('loginBtn').addEventListener('click', loginForm);
+    document.getElementById('resetBtn').addEventListener('click', resetPassword);
+    document.getElementById('registerBtn').addEventListener('click', registerUser);
+
+    // Handle login form submission
+    function loginForm() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      if (!email || !password) {
+        document.getElementById('message').innerHTML = "Email and Password are required!";
+        document.getElementById('email').classList.add('invalid');
+        document.getElementById('password').classList.add('invalid');
+        return;
+      }
+
+      fetch('/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `email=${email}&password=${password}`
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          window.location.href = "/home";
+        } else {
+          document.getElementById('message').innerHTML = data.message;
+        }
+      });
+    }
+
+    // Handle password reset form submission
+    function resetPassword() {
+      const email = document.getElementById('resetEmail').value;
+      const newPassword = document.getElementById('newPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+
+      if (newPassword === confirmPassword) {
+        fetch('/forgot_password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `email=${email}&newPassword=${newPassword}&confirmPassword=${confirmPassword}`
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById('message').innerHTML = "<p class='success'>Password updated successfully!</p>";
+            resetForms();
+          } else {
+            document.getElementById('message').innerHTML = data.message;
+          }
+        });
+      } else {
+        document.getElementById('message').innerHTML = "Passwords do not match.";
+      }
+    }
+
+    // Handle new user registration
+    
+    function registerUser() {
+  const name = document.getElementById('RnewName').value;
+  const email = document.getElementById('RnewEmail').value;
+  const password = document.getElementById('RnewPassword').value;
+  const confirmPassword = document.getElementById('RconfirmPassword').value;
+      console.log(`$name`);
+  if (!name || !email || !password || !confirmPassword) {
+    document.getElementById('message').innerHTML = "All fields are required.";
+    return;
+  }
+
+  if (password !== confirmPassword) {
+    document.getElementById('message').innerHTML = "Passwords do not match.";
+    return;
+  }
+
+  // Proceed with the fetch call
+  fetch('/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `name=${name}&email=${email}&password=${password}`
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById('message').innerHTML = "<p class='success'>Registration successful! You can now log in.</p>";
+      resetForms();
+    } else {
+      document.getElementById('message').innerHTML = data.message;
+    }
+  })
+  .catch(err => {
+    console.error("Error during registration:", err);
+    document.getElementById('message').innerHTML = "Something went wrong. Please try again later.";
+  });
+}
+
+
+    // Helper function to reset forms and show the login form again
+    function resetForms() {
+      document.getElementById('newUserForm').style.display = 'none';
+      document.getElementById('forgotPasswordForm').style.display = 'none';
+      document.getElementById('userForm').style.display = 'block';
+      document.getElementById('forgotPasswordLink').style.display = 'block';
+    }
+
+    // Show forgot password form and hide login form
+    function showForgotPasswordForm() {
+      document.getElementById('forgotPasswordForm').style.display = 'block';
+      document.getElementById('forgotPasswordLink').style.display = 'none';
+      document.getElementById('userForm').style.display = 'none';
+    }
+
+    // Show registration form and hide login and forgot password forms
+    function showNewUserForm() {
+      document.getElementById('newUserForm').style.display = 'block';
+      document.getElementById('forgotPasswordLink').style.display = 'none';
+      document.getElementById('userForm').style.display = 'none';
+      document.getElementById('forgotPasswordForm').style.display = 'none';
+    }
+
+    function showLoginForm()
+    {
+      document.getElementById('newUserForm').style.display = 'none';
+      document.getElementById('forgotPasswordLink').style.display = 'none';
+      document.getElementById('userForm').style.display = 'block';
+      document.getElementById('forgotPasswordForm').style.display = 'none';
+    }
+  </script>
+
+</body>
+</html>

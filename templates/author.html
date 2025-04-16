@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ name }} - Author Details</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+    .author-container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 80%;
+      max-width: 800px;
+    }
+    .author-info {
+      display:block;
+      align-items: center;
+    }
+    .author-info img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      margin-right: 20px;
+    }
+    .author-info h2 {
+      margin: 0;
+    }
+    .author-info p {
+      font-size: 16px;
+      color: gray;
+    }
+    a{
+        text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <h3 style="color: blue; font-style: italic; margin-left: 80%; width: fit-content;">UserMania</h3>
+  <div class="author-container">
+    <div class="author-info">
+        <h3 style="color:brown"> Author details</h3>
+      {% if mail %}
+        <h4>Author Name : {{ name }}</h4>
+        <h4>Author's contribution</h4>
+      {% for post in post_titles %}
+          <li>{{ post[0] }}</li>
+      {% endfor %}
+      {% if liked_posts %}
+<h4>Author Liked posts are:</h4>
+<ul>
+    {% for post in liked_posts %}
+        <li>{{ post }}</li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>Author haven't liked any of the post</p>
+{% endif %}
+        <p> <br>Email: <a href="mailto:{{ mail }}">You can write mail to author by clicking here </a></p>
+      {% else %}
+        <p>No author details found.</p>
+      {% endif %}
+      
+    </div>
+  </div>
+
+</body>
+</html>

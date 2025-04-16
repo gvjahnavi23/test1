@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Page</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: auto;
+      flex-direction: column;
+    }
+    .container {
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 80%;
+      max-width: 800px;
+    }
+    h2 {
+      text-align: center;
+    }
+    .posts {
+      margin-top: 20px;
+    }
+    .post {
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 4px;
+    }
+    button {
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    pre {
+      white-space: pre-wrap;       /* Ensures line breaks and spaces are retained */
+      word-wrap: break-word;       /* Ensures long words are wrapped */
+      overflow-wrap: break-word;   /* Prevents unbreakable text from overflowing */
+      max-width: 100%;             /* Ensures content doesn't exceed the container width */
+      word-break: break-word;      /* Breaks long words when necessary */
+    }
+    .comments {
+  background-color: #f8f8f8;
+  padding: 5px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 10px;
+}
+
+.likes {
+    display: flex;
+    align-items: center;  /* Align button and count vertically */
+    gap: 5px;  /* Space between button and like count */
+}
+
+.like-form {
+    display: flex;
+    align-items: center;
+}
+
+.likes button {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.like-count {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.comments h4 {
+  color: #333;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.comments ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.comments li {
+  background-color: #ffffff;
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 5px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.comments p {
+  color: #777;
+  font-size: 12px;
+}
+
+.comments li:hover {
+  background-color: #f0f0f0;
+}
+
+.comments .no-comments {
+  font-style: italic;
+  color: #555;
+}
+p a 
+{
+      width: 100%;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-decoration: none;
+  
+}
+
+  </style>
+</head>
+<body>
+  <h3 style="color: blue; font-style: italic; margin-left: 80%; width: fit-content;">UserMania</h3>
+  <div class="container">
+    {% if user_name %}
+      <h2>Hi, {{ user_name }}! Welcome to the Home Page</h2>
+      <button onclick="window.location.href='/write_post'">Write Post</button>
+      <button onclick="window.location.href='/display'">My Profile 😉</button>
+    {% else %}
+      <p><a href="/logout">Log in</a> to write a post.</p>
+    {% endif %}
+  
+    <div class="posts">
+      {% for post in posts %}
+        <div class="post">
+          <h3>{{ post['title'] }}</h3>
+          <i><h4 style="text-align: left; color: blueviolet;">
+            <a href="/display_author/{{ post['name'] }}">by {{ post['name'] }}</a>
+          </h4></i>
+          <p><pre>{{ post['content'] }}</pre></p>
+          {% if post['image'] %}
+        <img src="{{ url_for('get_media', post_id=post['_id']) }}" alt="Post Image" width="150" height="200">
+    {% elif post['video'] %}
+        <video width="320" height="240" controls>
+            <source src="{{ url_for('get_media', post_id=post['_id']) }}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    {% endif %}
+
+          <div class="likes">
+            <form action="/add_like" method="post" class="like-form">
+                <input type="hidden" name="title" value="{{ post['title'] }}">
+                <input type="hidden" name="author" value="{{ post['name'] }}">
+                <button type="submit">💖</button>  
+                {% if post['likes'] %}
+                <span class="like-count">{{ post['likes'] }}</span>
+                {% endif %}
+            </form>
+            <p class="like-message" style="color: red; display: none;"></p> <!-- For messages -->
+        </div>
+        
+          <!-- Comments Section -->
+          <div class="comments">
+            <h4>Comments:</h4>
+            {% if comments[post['title']+post['name']] %}
+              <ul>
+                {% for comment in comments[post['title']+post['name']] %}
+                  <li>
+                    <span class="commenter-name" style=" color: #007bff;"><a href="/display_author/{{ comment.split(':')[0] }}">{{ comment.split(':')[0] }}</a></span>
+                    <span class="comment-text">{{ comment.split(":")[1] }}</span>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p>No comments yet. Be the first to comment!</p>
+            {% endif %}
+          </div>
+          
+  
+          <!-- Add Comment Form -->
+          <form action="/add_comment" method="POST" style="margin-top: 10px;">
+            <input type="hidden" name="title" value="{{ post['title'] }}">
+            <input type="hidden" name="author" value="{{ post['name'] }}">
+            <textarea name="comment" placeholder="Write your comment..." required style="width: 95%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;"></textarea>
+            <button type="submit" style="margin-top: 5px;">Add Comment</button>
+          </form>
+        </div>
+      {% else %}
+        <p>No posts available.</p>
+      {% endfor %}
+    </div>
+  </div>
+  
+
+</body>
+<script>
+  document.querySelectorAll('.like-form').forEach(form => {
+      form.addEventListener('submit', async function(event) {
+          event.preventDefault();  // Prevent page reload
+  
+          let formData = new FormData(this);
+          let response = await fetch('/add_like', {
+              method: 'POST',
+              body: formData
+          });
+  
+          let result = await response.json();
+          let likeCountSpan = this.querySelector('.like-count');
+          let messagePara = this.parentElement.querySelector('.like-message');
+  
+          if (result.status === 'success') {
+              likeCountSpan.textContent = result.likes;  // Update like count
+              messagePara.style.display = 'none';  // Hide message
+          } else {
+              messagePara.textContent = result.message;  // Show error message
+              messagePara.style.display = 'block';
+          }
+      });
+  });
+  </script>
+</html>
