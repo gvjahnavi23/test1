@@ -11,7 +11,7 @@ import mimetypes
 import imghdr
 from bson import Binary
 app = Flask(__name__)
-with open("test\config.json", "r") as file:
+with open("config.json", "r") as file:
     config = json.load(file)
     
 app.secret_key = config["secret_key" ""]
@@ -97,8 +97,7 @@ def forgot_password():
 @app.route('/home')
 def home():
     # Fetch posts from the database (assuming posts are in 'posts' collection)
-    postts = db['posts'].find().sort('_id', -1) #sort by id descending order
-    # postts = db['posts'].find()  # Adjust collection name if needed
+    postts = db['posts'].find()  # Adjust collection name if needed
     user_name = session.get('user_name')
     # commentts = db['comments_db'].find()
     comments = {}
@@ -335,4 +334,4 @@ def logout():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
